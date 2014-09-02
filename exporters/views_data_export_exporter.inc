@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * Base class defining the common methods available to exporters.
  */
@@ -69,5 +71,14 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
    *   - row_count: The final number of rows in the generated file.
    */
   function post_process(&$results) {
+  }
+
+  /**
+   * Set options fields and default values.
+   *
+   * @return
+   * An array of options information.
+   */
+  function option_definition() {
   }
 }

@@ -9,13 +9,16 @@ dependencies[] = views
 ; Plugins
 files[] = plugins/views_data_export_plugin_display_export.inc
 files[] = plugins/views_data_export_plugin_style_export.inc
-files[] = plugins/views_data_export_plugin_style_export_csv.inc
-files[] = plugins/views_data_export_plugin_style_export_xml.inc
 
 ; Exporters
 files[] = exporters/views_data_export_exporter.inc
 files[] = exporters/views_data_export_exporter_delimited.inc
 files[] = exporters/views_data_export_exporter_excel_xlsx.inc
+files[] = exporters/views_data_export_exporter_xml.inc
+
+; Interfaces
+files[] = exporters/ViewsDataExportExporterInterface.inc
+files[] = exporters/ViewsDataExportExporterUserConfigurationInterface.inc
 
 ; Tests
 files[] = "tests/base.test"

@@ -11,6 +11,8 @@ interface ViewsDataExportExporterInterface {
    */
   function __construct($options);
 
+  function option_definition();
+
   /**
    * Add a single row to the export file.
    *

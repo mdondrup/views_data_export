@@ -11,6 +11,9 @@
  */
 class views_data_export_plugin_style_export extends views_plugin_style {
 
+  private $exporter = null;
+  public $options = null;
+
   /**
    * Set options fields and default values.
    *
@@ -36,6 +39,12 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       'default' => FALSE,
       'translatable' => FALSE,
     );
+
+    $options['exporter_options'] = $this->get_exporter()->option_definition();
+
+    // Get a local copy just in case.
+    $this->options = $options;
+
     return $options;
   }
 
@@ -84,6 +93,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
 
     // Get a list of the available arguments for token replacement.
     $options = array();
+    $options = $this->options;
 
     $count = 0; // This lets us prepare the key as we want it printed.
     foreach ($this->view->display_handler->get_handlers('argument') as $arg => $handler) {
@@ -140,6 +150,20 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       '#default_value' => $this->options['parent_sort'],
       '#description' => t('Try to apply any additional sorting from the attached display like table sorting to the exported feed.'),
     );
+
+    // Add any settings form elements for the exporter
+    $form_exporter_settings = array(
+      '#type' => 'fieldset',
+      '#title' => t('Exporter settings'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $labelss = $this->display->handler->get_field_labels();
+    $this->exporter->options_form($form_exporter_settings, $form_state, $options['exporter_options'], $this->display->handler->get_field_labels());
+    $form['exporter_settings'] = $form_exporter_settings;
+
+    $stop='here';
+
   }
 
   /**
@@ -218,6 +242,11 @@ class views_data_export_plugin_style_export extends views_plugin_style {
    * Render the display in this style.
    */
   function render() {
+    // Get our exporter ready.
+    if (!isset($this->exporter)) {
+      $this->get_exporter();
+    }
+
     if ($this->uses_row_plugin() && empty($this->row_plugin)) {
       vpr('views_plugin_style_default: Missing row plugin');
       return;
@@ -380,5 +409,20 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     }
 
     return $filename;
+  }
+
+  /**
+   * Get our exporter initialised and ready for use.
+   */
+  function get_exporter($options = NULL) {
+    if (is_null($options)) {
+      $options = $this->options['exporter_options'];
+    }
+    $this->exporter = new $this->definition['exporter']($options);
+    return $this->exporter;
+  }
+
+  function options_submit(&$form, &$form_state) {
+    $this->exporter->options_submit($form, $form_state);
   }
 }
