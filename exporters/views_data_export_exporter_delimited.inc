@@ -1,18 +1,24 @@
 <?php
+
+require_once 'views_data_export_exporter.inc';
+
 /**
  * Webform exporter for creating CSV/TSV delimited files.
  */
 class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
-  public $delimiter;
+  public $separator;
 
   function __construct($options) {
-    $this->delimiter = isset($options['delimiter']) ? $options['delimiter'] : ',';
+    $this->options = $options;
+
+    $this->separator = isset($options['separator']) ? $options['separator'] : ',';
     // Convert tabs.
-    if ($this->delimiter == '\t') {
-      $this->delimiter = "\t";
+    if ($this->separator == '\t') {
+      $this->separator = "\t";
     }
-    $options['delimiter'] = $this->delimiter;
-    //parent::__construct($options);
+    $options['separator'] = $this->separator;
+
+    parent::__construct($options);
   }
 
   /**
@@ -22,7 +28,6 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
    * An array of options information.
    */
   function option_definition() {
-    //$options = parent::option_definition();
 
     $options['separator'] = array(
       'default' => ',',
@@ -70,28 +75,27 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
    * @return
    * None.
    */
-  function options_form(&$form, &$form_state, $options, $field_labels) {
-    //parent::options_form($form, $form_state);
+  function options_form(&$form, &$form_state, $field_labels) {
 
     $form['separator'] = array(
       '#type' => 'textfield',
       '#title' => t('Separator'),
-      '#default_value' => !empty($options['separator']) ? $options['separator'] : ',',
+      '#default_value' => !empty($this->options['separator']) ? $this->options['separator'] : ',',
       '#description' => t('This is the separator that is used to separate fields. CSV implies comma separated fields so this should not be changed unless you have specific requirements'),
     );
     $form['quote'] = array(
       '#type' => 'checkbox',
-      '#default_value' => !empty($options['quote']),
+      '#default_value' => !empty($this->options['quote']),
       '#title' => t('Quote values. Useful for output that might contain your separator as part of one of the values.'),
     );
     $form['trim'] = array(
       '#type' => 'checkbox',
-      '#default_value' => !empty($options['trim']),
+      '#default_value' => !empty($this->options['trim']),
       '#title' => t('Trim whitespace from rendered fields. Can be useful for some themes where output results in extra newlines.'),
     );
     $form['replace_newlines'] = array(
       '#type' => 'checkbox',
-      '#default_value' => !empty($options['replace_newlines']),
+      '#default_value' => !empty($this->options['replace_newlines']),
       '#title' => t('Replace newlines in rendered fields.'),
     );
     $form['newline_replacement'] = array(
@@ -99,23 +103,23 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
       '#suffix' => '</div></div>',
       '#type' => 'textfield',
       '#title' => t('Replacement'),
-      '#default_value' => $options['newline_replacement'],
+      '#default_value' => $this->options['newline_replacement'],
       '#process' => array('ctools_dependent_process'),
       '#dependency' => array('edit-style-options-replace-newlines' => array(TRUE)),
     );
     $form['header'] = array(
       '#type' => 'checkbox',
       '#title' => t('Make first row a list of column headers.'),
-      '#default_value' => !empty($options['header']),
+      '#default_value' => !empty($this->options['header']),
     );
     $form['keep_html'] = array(
       '#type' => 'checkbox',
-      '#default_value' => !empty($options['keep_html']),
+      '#default_value' => !empty($this->options['keep_html']),
       '#title' => t('Keep HTML tags.'),
     );
     $form['encoding'] = array(
       '#type' => 'textfield',
-      '#default_value' => !empty($options['encoding']) ? $options['encoding'] : '',
+      '#default_value' => !empty($this->options['encoding']) ? $this->options['encoding'] : '',
       '#title' => t('Character encoding conversion'),
       '#description' => t('Optionally specify a character conversion that some CSV file readers need. Use "utf8_decode" for ISO-8859-1 via <a href="@utf8_decode">utf8_decode PHP function</a>, other values will be passed <a href="@iconv">iconv</a> (this requires the iconv PHP extension), empty or illegal values will leave the output as UTF-8.',
         array('@iconv' => 'http://www.php.net/manual/en/function.iconv.php', '@utf8_decode' => 'http://www.php.net/manual/en/function.utf8-decode.php')),
@@ -131,16 +135,20 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
       // Remove <script> tags, which mysteriously cause Excel not to import.
       $data[$key] = preg_replace('!<(/?script.*?)>!', '[$1]', $data[$key]);
     }
-    $row = implode($this->delimiter, $data) . "\n";
+    $row = implode($this->separator, $data) . "\n";
 
     @fwrite($file_handle, $row);
+  }
+
+  function add_header(&$file_handle, $filename) {
+    return 'file header';
   }
 
   function get_headers($filename) {
     $headers = parent::get_headers($filename);
 
     // Convert tabs.
-    if ($this->delimiter == "\t") {
+    if ($this->separator == "\t") {
       $extension = 'tsv';
       $content_type = 'text/tab-separated-values';
     }
@@ -154,7 +162,17 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
     return $headers;
   }
 
+  /**
+   * Alter the options on submission.
+   */
   function options_submit() {
+
+  }
+
+  /**
+   * Validate the options.
+   */
+  function options_validate(&$form, &$form_state) {
 
   }
 }

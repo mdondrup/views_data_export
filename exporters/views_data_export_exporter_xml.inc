@@ -2,7 +2,7 @@
 /**
  * Webform exporter for creating XML files.
  */
-class ViewsDataExportExporterXML extends ViewsDataExportExporter
+class ViewsDataExportExporterXML extends ViewsDataExportExporter implements ViewsDataExportExporterUserConfigurationInterface
 {
   private $exporter_options = array();
 
@@ -13,7 +13,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
    *   The array of export options as provided by the user-interface.
    */
   function __construct($options) {
-    $this->exporter_options = $options;
+    $this->options = $options;
   }
 
 
@@ -64,19 +64,19 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
    * @return
    * None.
    */
-  function options_form(&$form, &$form_state, $options, $field_labels) {
+  function options_form(&$form, &$form_state, $field_labels) {
     //$options = parent::options_form($form, $form_state);
 
     $form['transform'] = array(
       '#type' => 'checkbox',
       '#title' => t('Transform spaces'),
-      '#default_value' => $options['transform'],
+      '#default_value' => $this->options['transform'],
       '#description' => t('Transform spaces to valid XML in field labels (spaces create invalid XML markup). Note that invalid XML tag characters will always be converted.'),
     );
     $form['transform_type'] = array(
       '#type' => 'select',
       '#title' => t('Transform type'),
-      '#default_value' => $options['transform_type'],
+      '#default_value' => $this->options['transform_type'],
       '#options' => array(
         'dash' => t('Dash'),
         'underline' => t('Underline'),
@@ -91,13 +91,13 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
     $form['root_node'] = array(
       '#type' => 'textfield',
       '#title' => t('Root node'),
-      '#default_value' => $options['root_node'],
+      '#default_value' => $this->options['root_node'],
       '#description' => t('The XML tag for the root node.'),
     );
     $form['item_node'] = array(
       '#type' => 'textfield',
       '#title' => t('Item node'),
-      '#default_value' => $options['item_node'],
+      '#default_value' => $this->options['item_node'],
       '#description' => t('The XML tag for an item node.'),
     );
 
@@ -111,7 +111,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
         '#type' => 'checkboxes',
         '#title' => t('Disable encoding of XML entities for these fields'),
         '#options' => $field_labels,
-        '#default_value' =>$options['no_entity_encode'],
+        '#default_value' =>$this->options['no_entity_encode'],
         '#description' => t('If checked field contents will be outputted '.
           '<em>without encoding</em> of XML entities. This is '.
           'useful when when used in conjunction with a field '.
@@ -127,7 +127,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
         '#type' => 'checkboxes',
         '#title' => t('Field values to wrap using CDATA'),
         '#options' => $field_labels,
-        '#default_value' => $field_labels['cdata_wrapper'],
+        '#default_value' => $this->options['cdata_wrapper'],
         '#description' => t('If checked the fields content will be wrapped using the CDATA tag.'),
       );
     }
@@ -205,5 +205,12 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter
    *   - row_count: The final number of rows in the generated file.
    */
   function post_process(&$results) {
+  }
+
+  /**
+   * Validate the options.
+   */
+  function options_validate(&$form, &$form_state) {
+
   }
 }

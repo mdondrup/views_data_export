@@ -1,6 +1,6 @@
 <?php
 
-
+require_once 'ViewsDataExportExporterInterface.inc';
 /**
  * Base class defining the common methods available to exporters.
  */

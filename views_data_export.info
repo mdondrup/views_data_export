@@ -27,3 +27,7 @@ files[] = "tests/doc_export.test"
 files[] = "tests/txt_export.test"
 files[] = "tests/xls_export.test"
 files[] = "tests/xml_export.test"
+
+; Exporter Tests
+files[] = "tests/exporter_tests/base.test"
+files[] = "tests/exporter_tests/csv.test"

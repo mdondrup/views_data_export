@@ -12,7 +12,6 @@
 class views_data_export_plugin_style_export extends views_plugin_style {
 
   private $exporter = null;
-  public $options = null;
 
   /**
    * Set options fields and default values.
@@ -40,10 +39,10 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       'translatable' => FALSE,
     );
 
-    $options['exporter_options'] = $this->get_exporter()->option_definition();
-
-    // Get a local copy just in case.
-    $this->options = $options;
+    $options['exporter_options'] = array(
+      'default' => array(),
+      'translatable' => FALSE,
+    );
 
     return $options;
   }
@@ -157,12 +156,10 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       '#title' => t('Exporter settings'),
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
+      '#tree' => TRUE,
     );
-    $labelss = $this->display->handler->get_field_labels();
-    $this->exporter->options_form($form_exporter_settings, $form_state, $options['exporter_options'], $this->display->handler->get_field_labels());
-    $form['exporter_settings'] = $form_exporter_settings;
-
-    $stop='here';
+    $this->get_exporter()->options_form($form_exporter_settings, $form_state, $this->display->handler->get_field_labels());
+    $form['exporter_options'] = $form_exporter_settings;
 
   }
 
@@ -418,11 +415,19 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     if (is_null($options)) {
       $options = $this->options['exporter_options'];
     }
-    $this->exporter = new $this->definition['exporter']($options);
+    if (is_null($this->exporter)){
+      $this->exporter = new $this->definition['exporter']($options);
+    }
     return $this->exporter;
   }
 
   function options_submit(&$form, &$form_state) {
-    $this->exporter->options_submit($form, $form_state);
+    $this->get_exporter()->options_submit($form, $form_state);
+    parent::options_submit($form, $form_state);
+  }
+
+  function options_validate(&$form, &$form_state) {
+    $this->get_exporter()->options_validate($form, $form_state);
+    parent::options_validate($form, $form_state);
   }
 }

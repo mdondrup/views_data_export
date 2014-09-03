@@ -1,0 +1,54 @@
+<?php
+
+abstract class ViewsDataExportExporterBaseTest extends DrupalUnitTestCase {
+
+  protected function executeFullWrite($exporter, $rows, $row_count) {
+
+    $file = fopen('php://memory', 'w+');
+    foreach ($rows as $row) {
+      $exporter->add_row($file, $row, $row_count);
+      $row_count++;
+    };
+
+    // Read from file and verify contents.
+    fseek($file, 0);
+    $contents = '';
+    while (!feof($file)) {
+      $contents .= fread($file, 8192);
+    }
+
+    // Close up the file stream.
+    fclose($file);
+
+    return $contents;
+  }
+
+  protected function executeBOF($exporter) {
+
+    $filename = 'my_file';
+    $file = fopen('php://memory', 'w+');
+    $exporter->bof($file);
+
+    // Read from file and verify contents.
+    fseek($file, 0);
+    $contents = '';
+    while (!feof($file)) {
+      $contents .= fread($file, 8192);
+    }
+
+    // Close up the file stream.
+    fclose($file);
+
+    return $contents;
+
+  }
+
+  protected function verbose($message) {
+    return $this->error($message, 'User notice');
+  }
+
+  public function logVerboseResult($result, $prefix = '') {
+    $this->verbose($prefix . '<br><pre>' . check_plain($result) .'</pre>');
+  }
+
+}
