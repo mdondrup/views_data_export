@@ -150,15 +150,19 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       '#description' => t('Try to apply any additional sorting from the attached display like table sorting to the exported feed.'),
     );
 
-    // Add any settings form elements for the exporter
-    $form_exporter_settings = array(
-      '#type' => 'fieldset',
-      '#title' => t('Exporter settings'),
-      '#collapsible' => FALSE,
-      '#collapsed' => FALSE,
-      '#tree' => TRUE,
-    );
-    $this->get_exporter()->options_form($form_exporter_settings, $form_state, $this->display->handler->get_field_labels());
+    // If the exporter needs settings, it will implement the interface.
+    if (in_array('ViewsDataExportExporterUserConfigurationInterface', $this->get_exporter())) {
+      // Group the exporter settings in a fieldset.
+      $form_exporter_settings = array(
+        '#type' => 'fieldset',
+        '#title' => t('Exporter settings'),
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+        '#tree' => TRUE,
+      );
+      // Get the form options from the exporter.
+      $this->get_exporter()->options_form($form_exporter_settings, $form_state, $this->display->handler->get_field_labels());
+    }
     $form['exporter_options'] = $form_exporter_settings;
 
   }
@@ -422,7 +426,9 @@ class views_data_export_plugin_style_export extends views_plugin_style {
   }
 
   function options_submit(&$form, &$form_state) {
-    $this->get_exporter()->options_submit($form, $form_state);
+    if (in_array('ViewsDataExportExporterUserConfigurationInterface', $this->get_exporter())) {
+      $this->get_exporter()->options_submit($form, $form_state);
+    }
     parent::options_submit($form, $form_state);
   }
 

@@ -1,4 +1,7 @@
 <?php
+
+require_once 'views_data_export_exporter.inc';
+
 /**
  * This exporter creates an XLSX file readable by newer versions of Excel.
  */
@@ -9,6 +12,12 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
   const DATE_REGEX_ANY = '/^((\d{4})(-(\d{2}))(-(\d{2})))?(([T \s]?(\d{2}))(:(\d{2}))(:(\d{2}))?)?$/';
   const DATE_REGEX_DATE = '/^((\d{4})(-(\d{2}))(-(\d{2})))$/';
   const DATE_REGEX_TIME = '/^(([T \s]?(\d{2}))(:(\d{2}))(:(\d{2}))?)?$/';
+
+  function __construct($options) {
+    $this->options = $options;
+
+    parent::__construct($options);
+  }
 
   function add_row(&$file_handle, $data, $row_count) {
     $row = $row_count + 1;
