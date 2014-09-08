@@ -51,4 +51,8 @@ abstract class ViewsDataExportExporterBaseTest extends DrupalUnitTestCase {
     $this->verbose($prefix . '<br><pre>' . check_plain($result) .'</pre>');
   }
 
+  protected function test_add_row(){
+
+  }
+
 }

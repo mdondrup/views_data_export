@@ -81,4 +81,8 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
    */
   function option_definition() {
   }
+
+  function get_options() {
+    return $this->options;
+  }
 }

@@ -1,0 +1,109 @@
+<?php
+
+class TXTExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseTest {
+
+  protected $profile = 'testing';
+
+  public static function getInfo() {
+    return array(
+      'name' => 'TXT Exporter Test',
+      'description' => 'Various tests for export using the TXT exporter class.',
+      'group' => 'Views Data Export',
+    );
+  }
+
+  protected function getExporter($options = array()) {
+
+    // todo Replace require_once with an autoloader.
+    require_once dirname(__FILE__) . '/../../exporters/views_data_export_exporter_txt.inc';
+    $classname = $this->getExporterClassName();
+
+    return new $classname($options);
+  }
+
+  protected function getExporterClassName() {
+    return 'ViewsDataExportExporterTXT';
+  }
+
+  /**
+   * A very simple test dataset.
+   */
+  protected function dataSet() {
+    return array(
+      array(
+        'name' => 'John',
+        'age' => 25,
+        'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
+      ),
+      array(
+        'name' => 'George',
+        'age' => 27,
+        'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 2, 2000),
+      ),
+      array(
+        'name' => 'Ringo',
+        'age' => 28,
+        'job' => 'Drummer',
+        'created' => gmmktime(6, 30, 30, 1, 1, 2000),
+      ),
+      array(
+        'name' => 'Paul',
+        'age' => 26,
+        'job' => 'Songwriter',
+        'created' => gmmktime(6, 0, 0, 1, 1, 2000),
+      ),
+      array(
+        'name' => 'Meredith',
+        'age' => 30,
+        'job' => 'Speaker',
+        'created' => gmmktime(6, 30, 10, 1, 1, 2000),
+      ),
+    );
+  }
+
+  /**
+   * Test the header writing.
+   */
+  protected function testBOF() {
+    $result = $this->executeBOF($this->getExporter());
+    $expected = '';
+    $this->logVerboseResult($result, 'Actual result');
+    $this->logVerboseResult($expected, 'Expected result');
+    $this->assertEqual($result, $expected, 'The header is as expected.');
+  }
+
+  /**
+   * Test adding a row
+   */
+  protected function testBodyWrite() {
+    $miniDataSet = array(
+      array(
+        'name' => 'John',
+        'age' => 25,
+        'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
+      ),
+    );
+    $result = $this->executeFullWrite($this->getExporter(), $miniDataSet, 0);
+    $expected = '
+[name]
+John
+
+[age]
+25
+
+[job]
+Singer
+
+[created]
+946684800
+
+--------------------
+';
+    $this->logVerboseResult(strlen($result), 'Actual result');
+    $this->logVerboseResult(strlen($expected), 'Expected result');
+    $this->assertEqual($result, $expected, 'The content is as expected.');
+  }
+}

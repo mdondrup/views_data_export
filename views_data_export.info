@@ -13,7 +13,9 @@ files[] = plugins/views_data_export_plugin_style_export.inc
 ; Exporters
 files[] = exporters/views_data_export_exporter.inc
 files[] = exporters/views_data_export_exporter_delimited.inc
+files[] = exporters/views_data_export_exporter_doc.inc
 files[] = exporters/views_data_export_exporter_excel_xlsx.inc
+files[] = exporters/views_data_export_exporter_txt.inc
 files[] = exporters/views_data_export_exporter_xml.inc
 
 ; Interfaces
@@ -32,3 +34,6 @@ files[] = "tests/xml_export.test"
 files[] = "tests/exporter_tests/base.test"
 files[] = "tests/exporter_tests/csv.test"
 files[] = "tests/exporter_tests/xlsx.test"
+files[] = "tests/exporter_tests/txt.test"
+files[] = "tests/exporter_tests/doc.test"
+files[] = "tests/exporter_tests/xml.test"

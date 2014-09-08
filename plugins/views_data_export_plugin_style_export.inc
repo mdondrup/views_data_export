@@ -151,7 +151,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     );
 
     // If the exporter needs settings, it will implement the interface.
-    if (in_array('ViewsDataExportExporterUserConfigurationInterface', $this->get_exporter())) {
+    if (in_array( 'ViewsDataExportExporterUserConfigurationInterface', class_implements($this->get_exporter()))) {
       // Group the exporter settings in a fieldset.
       $form_exporter_settings = array(
         '#type' => 'fieldset',
@@ -426,14 +426,16 @@ class views_data_export_plugin_style_export extends views_plugin_style {
   }
 
   function options_submit(&$form, &$form_state) {
-    if (in_array('ViewsDataExportExporterUserConfigurationInterface', $this->get_exporter())) {
+    if (in_array( 'ViewsDataExportExporterUserConfigurationInterface', class_implements($this->get_exporter()))) {
       $this->get_exporter()->options_submit($form, $form_state);
     }
     parent::options_submit($form, $form_state);
   }
 
   function options_validate(&$form, &$form_state) {
-    $this->get_exporter()->options_validate($form, $form_state);
+    if (in_array( 'ViewsDataExportExporterUserConfigurationInterface', class_implements($this->get_exporter()))) {
+      $this->get_exporter()->options_validate($form, $form_state);
+    }
     parent::options_validate($form, $form_state);
   }
 }

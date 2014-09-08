@@ -1,10 +1,13 @@
 <?php
+
+require_once 'views_data_export_exporter.inc';
+require_once 'ViewsDataExportExporterUserConfigurationInterface.inc';
+
 /**
  * Webform exporter for creating XML files.
  */
 class ViewsDataExportExporterXML extends ViewsDataExportExporter implements ViewsDataExportExporterUserConfigurationInterface
 {
-  private $exporter_options = array();
 
   /**
    * Constructor for views_data_export_exporter classes.
@@ -14,8 +17,9 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    */
   function __construct($options) {
     $this->options = $options;
-  }
 
+    parent::__construct($options);
+  }
 
   /**
    * Set options fields and default values.
@@ -162,6 +166,13 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   The current number of rows in the export file.
    */
   function add_row(&$file_handle, $data, $row_count) {
+    // Put some very very basic xml in to get going.
+    $row = '<item>';
+    foreach ($data as $key => $value) {
+      $row .= '<' . $key . '>' . $value . '</' . $key . '>';
+    }
+    $row .= '</item>';
+    @fwrite($file_handle, $row);
   }
 
   /**
@@ -211,6 +222,5 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    * Validate the options.
    */
   function options_validate(&$form, &$form_state) {
-
   }
 }
