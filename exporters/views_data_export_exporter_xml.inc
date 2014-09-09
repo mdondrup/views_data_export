@@ -16,9 +16,28 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   The array of export options as provided by the user-interface.
    */
   function __construct($options) {
+//    $this->options = $options;
+
+    // Ensure defaults are set.
+    $definition = $this->option_definition();
+    foreach ($definition as $option_name => $properties) {
+      if (!isset($options[$option_name])) {
+        $options[$option_name] = $properties['default'];
+      }
+    }
+
+    $options['no_entity_encode'] = array_filter($options['no_entity_encode']);
+    $options['cdata_wrapper'] = array_filter($options['cdata_wrapper']);
     $this->options = $options;
 
     parent::__construct($options);
+  }
+
+  /**
+   * Tell the world whether we support Hide If Empty views option
+   */
+  function supports_hide_if_empty() {
+    return TRUE;
   }
 
   /**
@@ -28,34 +47,34 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    * An array of options information.
    */
   function option_definition() {
-    //$options = parent::option_definition();
+    $definition = array();
 
-    $options['transform'] = array(
+    $definition['transform'] = array(
       'default' => TRUE,
       'translatable' => FALSE,
     );
-    $options['transform_type'] = array(
+    $definition['transform_type'] = array(
       'default' => 'dash',
       'translatable' => FALSE,
     );
-    $options['root_node'] = array(
-      'default' => '',
+    $definition['root_node'] = array(
+      'default' => 'root',
       'translatable' => FALSE,
     );
-    $options['item_node'] = array(
-      'default' => '',
+    $definition['item_node'] = array(
+      'default' => 'item',
       'translatable' => FALSE,
     );
-    $options['no_entity_encode'] = array(
+    $definition['no_entity_encode'] = array(
       'default' => array(),
       'translatable' => FALSE,
     );
-    $options['cdata_wrapper'] = array(
+    $definition['cdata_wrapper'] = array(
       'default' => array(),
       'translatable' => FALSE,
     );
 
-    return $options;
+    return $definition;
   }
 
   /**
@@ -69,7 +88,6 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    * None.
    */
   function options_form(&$form, &$form_state, $field_labels) {
-    //$options = parent::options_form($form, $form_state);
 
     $form['transform'] = array(
       '#type' => 'checkbox',
@@ -106,7 +124,6 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
     );
 
     if (!empty($field_labels)) {
-      // changed to $options['field_labels'] from $options
       if (empty($options['no_entity_encode'])) {
         $options['no_entity_encode'] = array();
       }
@@ -164,16 +181,94 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   An array of formatted data for this row. One cell per item.
    * @param int $row_count
    *   The current number of rows in the export file.
+   * @param $field_titles
    */
-  function add_row(&$file_handle, $data, $row_count) {
-    // Put some very very basic xml in to get going.
-    $row = '<item>';
-    foreach ($data as $key => $value) {
-      $row .= '<' . $key . '>' . $value . '</' . $key . '>';
-    }
-    $row .= '</item>';
-    @fwrite($file_handle, $row);
+  function add_row(&$file_handle, $data, $row_count, $field_titles) {
+
+    fwrite($file_handle, '<' . $this->options['item_node'] . '>');
+    $this->array_to_xml($data, $file_handle, null, $field_titles);
+    fwrite($file_handle, '</' . $this->options['item_node'] . '>');
+
   }
+
+  function array_to_xml($array, &$file_handle, $open_key, $field_titles) {
+    $key_open = false;
+    foreach($array as $key => $value) {
+
+      $clean_tag = $this->_clean_tag_from_key($key, $field_titles);
+
+      // It's a parent node - open it and recurse to render the children.
+      if (is_array($value)) {
+        // Open a parent key.
+        fwrite($file_handle, '<' . $this->clean_xml_tag($field_titles[$key]) . '>');
+        $key_open = true;
+        // Recursive call, to render children.
+        $this->array_to_xml($value, $file_handle, $key, $field_titles);
+
+      // It's a child/leaf node - render it.
+      } else {
+
+
+        // Don't encode <> if it contains valid XML ready for export.
+        // (Or if it's about to be wrapped in CDATA tags!)
+        if (in_array($key, $this->options['no_entity_encode'], TRUE) || in_array($key, $this->options['cdata_wrapper'], TRUE)) {
+          $value_to_write = $value;
+        } else {
+          $value_to_write = htmlspecialchars($value);
+        }
+
+        // Wrap target elements in CDATA tags.
+        if (in_array($key, $this->options['cdata_wrapper'], TRUE)) {
+          $value_to_write = '<![CDATA[' . $value_to_write . ']]>';
+        }
+
+        // Write element to the file.
+        fwrite($file_handle, '<' . $clean_tag . '>' . $value_to_write . '</' . $clean_tag . '>');
+      }
+      // Close the open parent key.
+      if ($key_open) {
+        fwrite($file_handle, '</' . $clean_tag . '>');
+        $key_open = false;
+      }
+    }
+  }
+
+  function _clean_tag_from_key($key, $field_titles) {
+
+    // Get the actual field title for the key, then check it's clean.
+    // If we can't get one, we'll clean the one we have.
+    if (isset($field_titles[$key])) {
+      $key = $field_titles[$key];
+    }
+
+    // Make sure key/attribute names are valid.
+    if (isset($this->options['transform']) && $this->options['transform'] == true) {
+      // Perform the transforms.
+      switch ($this->options['transform_type']) {
+        case 'dash': $key = str_replace(' ', '-', $key);
+          break;
+
+        case 'underline': $key = str_replace(' ', '_', $key);
+          break;
+
+        case 'camelCase':
+          $key = ucwords($key);
+          $key = lcfirst($key);
+          $key = str_replace(' ', '', $key);
+          break;
+
+        case 'PascalCase':
+          $key = ucwords($key);
+          $key = str_replace(' ', '', $key);
+          break;
+      }
+    }
+
+    $clean_tag = $this->clean_xml_tag($key);
+
+    return $clean_tag;
+  }
+
 
   /**
    * Provide headers to the page when an export file is being downloaded.
@@ -196,6 +291,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   A PHP file handle to the export file.
    */
   function bof(&$file_handle) {
+    fwrite($file_handle, '<?xml version="1.0" encoding="UTF-8" ?>' . PHP_EOL . '<' . $this->options['root_node'] . '>');
   }
 
   /**
@@ -205,6 +301,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   A PHP file handle to the export file.
    */
   function eof(&$file_handle, $row_count, $col_count) {
+    fwrite($file_handle, '</' . $this->options['root_node'] . '>' );
   }
 
   /**

@@ -1,11 +1,12 @@
 <?php
 
 require_once 'views_data_export_exporter.inc';
+require_once 'ViewsDataExportExporterUserConfigurationInterface.inc';
 
 /**
  * Webform exporter for creating CSV/TSV delimited files.
  */
-class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
+class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implements ViewsDataExportExporterUserConfigurationInterface {
   public $separator;
 
   function __construct($options) {
@@ -127,17 +128,54 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
     return $form;
   }
 
-  function add_row(&$file_handle, $data, $row_count) {
+  function add_row(&$file_handle, $data, $row_count, $field_titles) {
+
     foreach ($data as $key => $value) {
+      // Trim whitespace.
+      if (isset($this->options['trim']) && $this->options['trim'] == true) {
+        $data[$key] = trim($data[$key]);
+      }
+
+      // Replace newlines.
+      if (isset($this->options['replace_newlines']) && $this->options['replace_newlines'] == true) {
+       $data[$key] = str_replace("\n", $this->options['newline_replacement'], $data[$key]);
+      }
+
       // Escape inner quotes and wrap all contents in new quotes.
       $data[$key] = '"' . str_replace('"', '""', $data[$key]) . '"';
 
       // Remove <script> tags, which mysteriously cause Excel not to import.
       $data[$key] = preg_replace('!<(/?script.*?)>!', '[$1]', $data[$key]);
+
+
     }
     $row = implode($this->separator, $data) . "\n";
 
-    @fwrite($file_handle, $row);
+    if (isset($this->options['encoding'])) {
+      $encoding = $this->options['encoding'];
+      // Blank -> UTF-8
+      if ($encoding == '') {
+        $row = utf8_encode($row);
+      }
+      // Use "utf8_decode" for ISO-8859-1 via utf8_decode PHP function.
+      else if ($encoding == 'utf8_decode') {
+        $row = utf8_decode($row);
+      }
+      // Other values are passed to iconv.
+      else if (iconv_get_encoding($encoding)){
+        $row = utf8_encode($row);
+        $row = iconv('UTF-8', $encoding, $row);
+      // If even iconv doesn't support the encoding,
+      // (it may be illegal/misspelled), then stick with UTF-8.
+      } else {
+        $row = utf8_encode($row);
+      }
+    } else {
+      // If no encoding is set, stick to UTF-8.
+      $row = utf8_encode($row);
+    }
+
+    fwrite($file_handle, $row);
   }
 
   function add_header(&$file_handle, $filename) {
@@ -165,7 +203,7 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
   /**
    * Alter the options on submission.
    */
-  function options_submit() {
+  function options_submit(&$form, &$form_state) {
 
   }
 
@@ -175,4 +213,28 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter {
   function options_validate(&$form, &$form_state) {
 
   }
+
+  /**
+   * Generate the BOF.
+   */
+  function bof(&$file_handle) {
+    $first_field = true;
+    foreach($this->options['field_labels'] as $field) {
+      if (! $first_field) {
+        fwrite($file_handle, ",");
+      } else {
+        $first_field = false;
+      }
+      fwrite($file_handle, '"' . $field . '"');
+    }
+    fwrite($file_handle, PHP_EOL);
+  }
+
+  /**
+   * Generate the EOF.
+   */
+  function eof(&$file_handle, $row_count, $col_count) {
+    return  'hello';
+  }
+
 }

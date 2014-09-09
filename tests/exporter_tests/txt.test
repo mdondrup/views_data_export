@@ -26,56 +26,19 @@ class TXTExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
   }
 
   /**
-   * A very simple test dataset.
-   */
-  protected function dataSet() {
-    return array(
-      array(
-        'name' => 'John',
-        'age' => 25,
-        'job' => 'Singer',
-        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
-      ),
-      array(
-        'name' => 'George',
-        'age' => 27,
-        'job' => 'Singer',
-        'created' => gmmktime(0, 0, 0, 1, 2, 2000),
-      ),
-      array(
-        'name' => 'Ringo',
-        'age' => 28,
-        'job' => 'Drummer',
-        'created' => gmmktime(6, 30, 30, 1, 1, 2000),
-      ),
-      array(
-        'name' => 'Paul',
-        'age' => 26,
-        'job' => 'Songwriter',
-        'created' => gmmktime(6, 0, 0, 1, 1, 2000),
-      ),
-      array(
-        'name' => 'Meredith',
-        'age' => 30,
-        'job' => 'Speaker',
-        'created' => gmmktime(6, 30, 10, 1, 1, 2000),
-      ),
-    );
-  }
-
-  /**
    * Test the header writing.
    */
   protected function testBOF() {
     $result = $this->executeBOF($this->getExporter());
     $expected = '';
+    // We don't expect a header.
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The header is as expected.');
   }
 
   /**
-   * Test adding a row
+   * Test that content rows are written correctly.
    */
   protected function testBodyWrite() {
     $miniDataSet = array(
@@ -86,24 +49,42 @@ class TXTExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'created' => gmmktime(0, 0, 0, 1, 1, 2000),
       ),
     );
-    $result = $this->executeFullWrite($this->getExporter(), $miniDataSet, 0);
-    $expected = '
-[name]
+    $result = $this->executeFullWrite($this->getExporter(), $miniDataSet, 0,
+      array(
+        'name' => 'Name',
+        'age' =>'Age',
+        'job' =>'Job',
+        'created' =>'Created',
+      )
+    );
+    $expected = '[Name]
+
 John
+[Age]
 
-[age]
 25
+[Job]
 
-[job]
 Singer
+[Created]
 
-[created]
 946684800
 
---------------------
-';
-    $this->logVerboseResult(strlen($result), 'Actual result');
-    $this->logVerboseResult(strlen($expected), 'Expected result');
+--------------------';
+    $this->logVerboseResult($result, 'Actual result');
+    $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
+  }
+
+  /**
+   * Test End Of File.
+   */
+  protected function testEOF() {
+    $exporter = $this->getExporter();
+    $result = $this->executeEOF($exporter);
+    $expect = '';
+    $this->logVerboseResult($result, 'Actual result');
+    $this->logVerboseResult($expect, 'Expected to contain');
+    $this->assertEqual($result, $expect, 'The EOF is as expected.');
   }
 }

@@ -18,6 +18,13 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
   }
 
   /**
+   * Tell the world whether we support Hide If Empty views option
+   */
+  function supports_hide_if_empty() {
+    return FALSE;
+  }
+
+  /**
    * Add a single row to the export file.
    *
    * @param $file_handle
@@ -26,8 +33,9 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
    *   An array of formatted data for this row. One cell per item.
    * @param int $row_count
    *   The current number of rows in the export file.
+   * @param $field_titles
    */
-  function add_row(&$file_handle, $data, $row_count) {
+  function add_row(&$file_handle, $data, $row_count, $field_titles) {
   }
 
   /**
@@ -82,7 +90,19 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
   function option_definition() {
   }
 
-  function get_options() {
-    return $this->options;
+  function clean_xml_tag($tag) {
+    // These characters are not valid at the start of an XML tag:
+    $invalid_start_chars = '-.0123456789';
+
+    // Need to trim invalid characters from the start of the string:
+    $tag = ltrim($tag, $invalid_start_chars);
+
+    // As a last line of defense, if we've stripped out everything, set it to
+    // something.
+    if (empty($tag)) {
+      $tag = 'data';
+    }
+
+    return $tag;
   }
 }

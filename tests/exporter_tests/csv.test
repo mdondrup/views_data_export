@@ -85,7 +85,14 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
   protected function testSeparatorOptions() {
 
     // Write the dataset, comma separated.
-    $result = $this->executeFullWrite($this->getExporter(array('separator' => ',')), $this->dataSet(), 0);
+    $result = $this->executeFullWrite($this->getExporter(array('separator' => ',')), $this->dataSet(), 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
+      )
+    );
     $expected = '"John","25","Singer","946684800"
 "George","27","Singer","946771200"
 "Ringo","28","Drummer","946708230"
@@ -98,7 +105,14 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
 
 
     // Write the dataset, tab separated.
-    $result = $this->executeFullWrite($this->getExporter(array('separator' => "\t")), $this->dataSet(), 0);
+    $result = $this->executeFullWrite($this->getExporter(array('separator' => "\t")), $this->dataSet(), 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
+      )
+    );
     $expected = '"John"' . "\t" . '"25"' . "\t" . '"Singer"' . "\t" . '"946684800"
 "George"' . "\t" . '"27"' . "\t" . '"Singer"' . "\t" . '"946771200"
 "Ringo"' . "\t" . '"28"' . "\t" . '"Drummer"' . "\t" . '"946708230"
@@ -117,13 +131,20 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
   protected function testTrim() {
     $dataSet = array(
       array(
-        'name' => "      John      ",
+        'name' => '      John      ',
         'age' => 25,
         'job' => 'Singer',
         'created' => gmmktime(0, 0, 0, 1, 1, 2000),
       ),
     );
-    $result = $this->executeFullWrite($this->getExporter(array('separator' => ",", 'trim' => true,)), $dataSet, 0);
+    $result = $this->executeFullWrite($this->getExporter(array('trim' => true,)), $dataSet, 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
+      )
+    );
     $expected =  '"John","25","Singer","946684800"
 ';
 
@@ -143,7 +164,14 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
       ),
     );
 
-    $result = $this->executeFullWrite($this->getExporter(array('separator' => ",", 'quote' => true,)), $dataSet, 0);
+    $result = $this->executeFullWrite($this->getExporter(array('separator' => ",", 'quote' => true,)), $dataSet, 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
+      )
+    );
     $expected =  '"John, the one with cool hair","25","Sin,ger","946684800"
 ';
 
@@ -157,13 +185,13 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
    * Test the newline replacement option.
    */
   protected function testNewLineOptions() {
-    // Write a dataset with quotes inside, and test the quote removal option.
+    // Write a dataset with newlines in the field values.
     $dataSet = array(
       array(
         'name' => 'John, the one with
 cool hair',
         'age' => 25,
-        'job' => 'Sin,ger',
+        'job' => 'Singer',
         'created' => gmmktime(0, 0, 0, 1, 1, 2000),
       ),
     );
@@ -174,9 +202,15 @@ cool hair',
         'quote' => true,
         'replace_newlines' => true,
         'newline_replacement' => 'NEWLINE',
+      )), $dataSet, 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
       )
-    ), $dataSet, 0);
-    $expected =  '"John, the one with cool hair","25","Sin,ger","946684800"
+    );
+    $expected =  '"John, the one withNEWLINEcool hair","25","Singer","946684800"
 ';
 
     $this->logVerboseResult($result, 'Actual result');
@@ -185,13 +219,13 @@ cool hair',
   }
 
   /**
-   * Test the HTML escaping option
+   * Test the HTML escaping option.
    */
   protected function testHTMLOptions() {
-    // Write a dataset with quotes inside, and test the quote removal option.
+    // Write a dataset with HTML inside, and test that it's kept.
     $dataSet = array(
       array(
-        'name' => '<em><a href="http://www.google.com">John</a></em>',
+        'name' => '<em>John</em>',
         'age' => 25,
         'job' => 'Singer',
         'created' => gmmktime(0, 0, 0, 1, 1, 2000),
@@ -204,8 +238,15 @@ cool hair',
         'quote' => true,
         'keep_html' => true,
       )
-    ), $dataSet, 0);
-    $expected =  '"<em><a href="http://www.google.com">John</a></em>, the one with cool hair","25","Singer","946684800"
+    ), $dataSet, 0,
+      array(
+        'name' => 'Name',
+        'age' => 'Age',
+        'job' => 'Job',
+        'created' => 'Created',
+      )
+    );
+    $expected =  '"<em>John</em>","25","Singer","946684800"
 ';
 
     $this->logVerboseResult($result, 'Actual result');
@@ -214,7 +255,7 @@ cool hair',
   }
 
   /**
-   * TODO Implement encoding tests
+   * Test encoding options.
    */
   protected function testEncodingOptions() {
 
@@ -234,11 +275,11 @@ cool hair',
     $encodings = array(
       'utf8_decode' => 'ISO-8859-1',
       'UTF-8' => 'UTF-8',
-      'illegal-encoding-name' => 'UTF-8',
+      'illegal-encoding-name&*%$' => 'UTF-8',
       '' => 'UTF-8',
     );
 
-    // Test all the encodings!
+    // Render content with each encoding.
     $row_count = 0;
     foreach ($encodings as $encoding => $expected) {
       $result = $this->executeFullWrite(
@@ -247,12 +288,28 @@ cool hair',
          'separator' => ',',
          'encoding' => $encoding,
         )),
-        $utf_8_dataset, $row_count);
+        $utf_8_dataset, $row_count,
+        array(
+          'name' => 'Name',
+          'age' => 'Age',
+          'job' => 'Job',
+          'created' => 'Created',
+        )
+      );
       $row_count++;
+
       // Check the resulting encoding.
       $result_encoding = mb_detect_encoding($result);
       $encoding_match = in_array($result_encoding, array($expected, 'ASCII'));
-      $this->assertTrue($encoding_match, 'Detected encoding ' . $result_encoding . ' matches ' . $expected);
+      $this->assertTrue($encoding_match, 'Detected encoding ' . $result_encoding . ' matches ' . $expected . ' for input value ' . $encoding);
     }
+  }
+
+  protected function testEOF() {
+    $result = $this->executeEOF($this->getExporter());
+    $expected =  '';
+    $this->logVerboseResult($result, 'Actual result');
+    $this->logVerboseResult($expected, 'Expected result');
+    $this->assertEqual($result, $expected, 'The EOF output is as expected.');
   }
 }

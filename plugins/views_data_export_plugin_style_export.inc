@@ -263,20 +263,46 @@ class views_data_export_plugin_style_export extends views_plugin_style {
   }
 
   function render_header() {
-    $rows = array();
-    $title = '';
-    $output = '';
-    $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_header'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
-    return $output;
+
+    // Open a file stream to write to.
+    $file = fopen('php://memory', 'w+');
+
+    // Get the BOF.
+    $this->get_exporter()->bof($file);
+
+    // Read from file and verify contents.
+    fseek($file, 0);
+    $contents = '';
+    while (!feof($file)) {
+      $contents .= fread($file, 8192);
+    }
+
+    // Close up the file stream.
+    fclose($file);
+
+    return $contents;
+
   }
 
   function render_footer() {
-    $rows = array();
-    $title = '';
-    $output = '';
-    $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_footer'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
+    // Open a file stream to write to.
+    $file = fopen('php://memory', 'w+');
 
-    return $output;
+    // Get the BOF.
+    // TODO Get the actual row and column counts!
+    $this->get_exporter()->eof($file, 0, 0);
+
+    // Read from file and verify contents.
+    fseek($file, 0);
+    $contents = '';
+    while (!feof($file)) {
+      $contents .= fread($file, 8192);
+    }
+
+    // Close up the file stream.
+    fclose($file);
+
+    return $contents;
   }
 
   function render_body() {
@@ -285,12 +311,26 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       return;
     }
 
+    $view     = $this->view;
+    $fields   = &$view->field;
+
+    $field_titles = array();
+    foreach ($fields as $key => $field) {
+      if (empty($field->options['exclude'])) {
+        $field_titles = check_plain($field->label());
+      }
+    }
+
     // Group the rows according to the grouping field, if specified.
     $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
 
     // Render each group separately and concatenate.  Plugins may override this
     // method if they wish some other way of handling grouping.
     $output = '';
+    $file = fopen('php://memory', 'w+');
+    $exporter = $this->get_exporter();
+    $row_count = 0;
+
     foreach ($sets as $title => $records) {
       if ($this->uses_row_plugin()) {
         $rows = array();
@@ -303,12 +343,47 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         $rows = $records;
       }
 
-      $title = '';
-      $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_body'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
+
+      $hide_empty_support = $exporter->supports_hide_if_empty();
+
+      $themed_rows = array();
+      $keys = array_keys($fields);
+      foreach ($rows as $num => $row) {
+        $themed_rows[$num] = array();
+
+        foreach ($keys as $id) {
+          if (empty($fields[$id]->options['exclude'])) {
+            $content = $view->style_plugin->rendered_fields[$num][$id];
+
+            if ($hide_empty_support && !empty($fields[$id]->options['hide_empty'])) {
+              if ($fields[$id]->is_value_empty($content, $fields[$id]->options['empty_zero'])) {
+                continue;
+              }
+            }
+
+            $themed_rows[$num][$id] = $content;
+          }
+        }
+      }
+
+
+      foreach ($themed_rows as $row) {
+        $exporter->add_row($file, $row, $row_count, $field_titles);
+        $row_count++;
+      };
     }
+
+    // Read from file and verify contents.
+    fseek($file, 0);
+    while (!feof($file)) {
+      $output .= fread($file, 8192);
+    }
+
+    // Close up the file stream.
+    fclose($file);
+
     unset($this->view->row_index);
     return $output;
-
   }
 
   /**

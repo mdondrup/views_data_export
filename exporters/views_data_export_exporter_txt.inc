@@ -14,6 +14,13 @@ class ViewsDataExportExporterTXT extends ViewsDataExportExporter {
   }
 
   /**
+   * Tell the world whether we support Hide If Empty views option
+   */
+  function supports_hide_if_empty() {
+    return TRUE;
+  }
+
+  /**
    * Set options fields and default values.
    *
    * @return
@@ -25,17 +32,16 @@ class ViewsDataExportExporterTXT extends ViewsDataExportExporter {
     return $options;
   }
 
-  function add_row(&$file_handle, $data, $row_count) {
+  function add_row(&$file_handle, $data, $row_count, $field_titles) {
     $row = '';
     foreach ($data as $key => $value) {
-      $row .= PHP_EOL;
-      $row .= '['.$key . ']' . PHP_EOL;
+      $row .= '[' . $field_titles[$key] . ']' . PHP_EOL . PHP_EOL;
       $row .= $value . PHP_EOL;
 
     }
     $row .= PHP_EOL . '--------------------' . PHP_EOL;
 
-    @fwrite($file_handle, $row);
+    fwrite($file_handle, $row);
   }
 
   function add_header(&$file_handle, $filename) {

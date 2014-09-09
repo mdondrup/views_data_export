@@ -19,7 +19,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
     parent::__construct($options);
   }
 
-  function add_row(&$file_handle, $data, $row_count) {
+  function add_row(&$file_handle, $data, $row_count, $field_titles) {
     $row = $row_count + 1;
     $col = 'A';
 
@@ -97,7 +97,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
     $output .= '</row>';
     $row++;
 
-    @fwrite($file_handle, $output);
+    fwrite($file_handle, $output);
   }
 
   function bof(&$file_handle) {
@@ -106,7 +106,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
     // output enough empty space to fill in the BOF later.
     // See webform_exporter_excel_xlsx::eof().
     $output = str_repeat(' ', 1024);
-    @fwrite($file_handle, $output . "\n");
+    fwrite($file_handle, $output . "\n");
   }
 
   function eof(&$file_handle, $row_count, $col_count) {
@@ -127,7 +127,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
     $bof .= '<sheetData>';
 
     @fseek($file_handle, 0);
-    @fwrite($file_handle, $bof);
+    fwrite($file_handle, $bof);
 
     $eof = '';
     $eof .= '</sheetData>';

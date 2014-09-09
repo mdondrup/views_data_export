@@ -22,8 +22,10 @@ interface ViewsDataExportExporterInterface {
    *   An array of formatted data for this row. One cell per item.
    * @param int $row_count
    *   The current number of rows in the export file.
+   * @param $field_titles
+   * @return
    */
-  function add_row(&$file_handle, $data, $row_count);
+  function add_row(&$file_handle, $data, $row_count, $field_titles);
 
   /**
    * Provide headers to the page when an export file is being downloaded.

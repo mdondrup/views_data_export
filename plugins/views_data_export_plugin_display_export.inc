@@ -1019,4 +1019,8 @@ class views_data_export_plugin_query_pgsql_batched extends views_data_export_plu
     }
     $view->execute_time = microtime(TRUE) - $start;
   }
+
+
+
+
 }
