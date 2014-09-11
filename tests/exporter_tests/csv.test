@@ -67,11 +67,12 @@ class CSVExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
    * Test the header writing.
    */
   protected function testBOF() {
+    $field_titles = array('name', 'age', 'job', 'created');
     $result = $this->executeBOF($this->getExporter(
       array(
         'field_labels' => array('name','age','job','created',),
       )
-    ));
+    ), $field_titles);
     $expected = '"name","age","job","created"
 ';
     $this->logVerboseResult($result, 'Actual result');

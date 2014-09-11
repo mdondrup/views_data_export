@@ -20,6 +20,8 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
     $options['separator'] = $this->separator;
 
     parent::__construct($options);
+
+    $stop = 'here';
   }
 
   /**
@@ -128,9 +130,15 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
     return $form;
   }
 
-  function add_row(&$file_handle, $data, $row_count, $field_titles) {
+  function add_row(&$file_handle, $data, $row_count, $field_labels) {
 
     foreach ($data as $key => $value) {
+
+      // Remove html tags, unless we should keep them.
+      if (!isset($this->options['keep_html']) || !$this->options['keep_html']) {
+        $data[$key] = strip_tags($data[$key]);
+      }
+
       // Trim whitespace.
       if (isset($this->options['trim']) && $this->options['trim'] == true) {
         $data[$key] = trim($data[$key]);
@@ -146,7 +154,6 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
 
       // Remove <script> tags, which mysteriously cause Excel not to import.
       $data[$key] = preg_replace('!<(/?script.*?)>!', '[$1]', $data[$key]);
-
 
     }
     $row = implode($this->separator, $data) . "\n";
@@ -176,6 +183,7 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
     }
 
     fwrite($file_handle, $row);
+
   }
 
   function add_header(&$file_handle, $filename) {
@@ -225,7 +233,14 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
       } else {
         $first_field = false;
       }
-      fwrite($file_handle, '"' . $field . '"');
+      // Strip html tags.
+      if (!isset($this->options['keep_html']) || !$this->options['keep_html']) {
+        $field = strip_tags($field);
+      }
+      // Escape inner quotes and wrap all contents in new quotes.
+      $field = '"' . str_replace('"', '""', $field) . '"';
+      // Write the field.
+      fwrite($file_handle, $field);
     }
     fwrite($file_handle, PHP_EOL);
   }
@@ -234,7 +249,7 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
    * Generate the EOF.
    */
   function eof(&$file_handle, $row_count, $col_count) {
-    return  'hello';
+    return '';
   }
 
 }

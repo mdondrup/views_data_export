@@ -72,7 +72,21 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'created' => 'created',
       )
     );
-    $expected = '<item><name>John Lennon</name><their-age>25</their-age><pets><cat>figaro</cat><dog>pluto</dog></pets><colours><data>red</data><data>blue</data></colours><their-job>they are a Singer</their-job><created>946684800</created></item>';
+    $expected = '  <item>
+    <name>John Lennon</name>
+    <their-age>25</their-age>
+    <pets>
+      <cat>figaro</cat>
+      <dog>pluto</dog>
+    </pets>
+    <colours>
+      <data>red</data>
+      <data>blue</data>
+    </colours>
+    <their-job>they are a Singer</their-job>
+    <created>946684800</created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -102,7 +116,13 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'their job' => 'their job',
         'created' => 'created',
       ));
-    $expected = '<item><name-of-artist>John Lennon</name-of-artist><their-age>25</their-age><their-job>they are a Singer</their-job><created>946684800</created></item>';
+    $expected = '  <item>
+    <name-of-artist>John Lennon</name-of-artist>
+    <their-age>25</their-age>
+    <their-job>they are a Singer</their-job>
+    <created>946684800</created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -115,7 +135,13 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'their job' => 'their job',
         'created' => 'created',
       ));
-    $expected = '<item><name_of_artist>John Lennon</name_of_artist><their_age>25</their_age><their_job>they are a Singer</their_job><created>946684800</created></item>';
+    $expected = '  <item>
+    <name_of_artist>John Lennon</name_of_artist>
+    <their_age>25</their_age>
+    <their_job>they are a Singer</their_job>
+    <created>946684800</created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -128,7 +154,13 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'their job' => 'their job',
         'created' => 'created',
       ));
-    $expected = '<item><nameOfArtist>John Lennon</nameOfArtist><theirAge>25</theirAge><theirJob>they are a Singer</theirJob><created>946684800</created></item>';
+    $expected = '  <item>
+    <nameOfArtist>John Lennon</nameOfArtist>
+    <theirAge>25</theirAge>
+    <theirJob>they are a Singer</theirJob>
+    <created>946684800</created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -141,7 +173,13 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'their job' => 'their job',
         'created' => 'created',
       ));
-    $expected = '<item><NameOfArtist>John Lennon</NameOfArtist><TheirAge>25</TheirAge><TheirJob>they are a Singer</TheirJob><Created>946684800</Created></item>';
+    $expected = '  <item>
+    <NameOfArtist>John Lennon</NameOfArtist>
+    <TheirAge>25</TheirAge>
+    <TheirJob>they are a Singer</TheirJob>
+    <Created>946684800</Created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -186,15 +224,20 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'name' => 'name',
       ))), $test_entity_encode_dataset, 0,
       array(
-        'Name' => 'Name',
-        'Age' => 'Name',
-        'Job' => 'Job',
+        'name' => 'name',
+        'age' => 'age',
+        'job' => 'job',
       )
     );
 
     // Expect the name attribute to contain the <strong> XML tags.
     // The <em> tags in the job attribute should still be escaped/encoded.
-    $expected = '<item><name><strong>John</strong></name><age>25</age><job>&lt;em&gt;Singer&lt;/em&gt;</job></item>';
+    $expected = '  <item>
+    <name><strong>John</strong></name>
+    <age>25</age>
+    <job>&lt;em&gt;Singer&lt;/em&gt;</job>
+  </item>
+';
 
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected to contain');
@@ -229,7 +272,14 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
         'created' => 'created',
       ));
     // Expect the illegal_content attribute value to be in CDATA tags.
-    $expected = '<item><illegal_content><![CDATA[illegal XML characters < & >]]></illegal_content><name>John</name><age>25</age><job>singer</job><created>946684800</created></item>';
+    $expected = '  <item>
+    <illegal_content><![CDATA[illegal XML characters < & >]]></illegal_content>
+    <name>John</name>
+    <age>25</age>
+    <job>singer</job>
+    <created>946684800</created>
+  </item>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');
@@ -250,5 +300,40 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expect, 'Expected to contain');
     $this->assertEqual($result, $expect, 'The EOF is as expected.');
+  }
+
+  /**
+   * Test that tags always come out valid.
+   */
+  protected function testTagValidity() {
+    // Set up a dataset with problems in the attribute names.
+    $spaced_dataset = array(
+      array(
+        'name of artist' => 'John Lennon',
+        'their age' => 25,
+        'their job' => 'they are a Singer',
+        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
+      ),
+    );
+
+    // Test each of the different swap-out options.
+
+    // Dash.
+    $result = $this->executeFullWrite($this->getExporter(array('transform' => true, 'transform_type' => 'dash',)), $spaced_dataset, 0,
+      array(
+        'name of artist' => '',
+        'their age' => '1',
+        'their job' => 'BadCharacters>&<',
+      ));
+    $expected = '  <item>
+    <no-name>John Lennon</no-name>
+    <data>25</data>
+    <BadCharacters>they are a Singer</BadCharacters>
+    <created>946684800</created>
+  </item>
+';
+    $this->logVerboseResult($result, 'Actual result');
+    $this->logVerboseResult($expected, 'Expected result');
+    $this->assertEqual($result, $expected, 'The content is as expected.');
   }
 }

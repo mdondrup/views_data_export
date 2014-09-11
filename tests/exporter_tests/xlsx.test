@@ -90,7 +90,12 @@ class XLSXExportViewsDataExportExporterTests extends ViewsDataExportExporterBase
         'Created',
       )
     );
-    $expected = '<row><c r="A1" t="inlineStr"><is><t>John</t></is></c><c r="B1"><v>25</v></c><c r="C1" t="inlineStr"><is><t>Singer</t></is></c><c r="D1"><v>946684800</v></c></row><row><c r="A2" t="inlineStr"><is><t>George</t></is></c><c r="B2"><v>27</v></c><c r="C2" t="inlineStr"><is><t>Singer</t></is></c><c r="D2"><v>946771200</v></c></row><row><c r="A3" t="inlineStr"><is><t>Ringo</t></is></c><c r="B3"><v>28</v></c><c r="C3" t="inlineStr"><is><t>Drummer</t></is></c><c r="D3"><v>946708230</v></c></row><row><c r="A4" t="inlineStr"><is><t>Paul</t></is></c><c r="B4"><v>26</v></c><c r="C4" t="inlineStr"><is><t>Songwriter</t></is></c><c r="D4"><v>946706400</v></c></row><row><c r="A5" t="inlineStr"><is><t>Meredith</t></is></c><c r="B5"><v>30</v></c><c r="C5" t="inlineStr"><is><t>Speaker</t></is></c><c r="D5"><v>946708210</v></c></row>';
+    $expected = '<row><c r="A1" t="inlineStr"><is><t>John</t></is></c><c r="B1"><v>25</v></c><c r="C1" t="inlineStr"><is><t>Singer</t></is></c><c r="D1"><v>946684800</v></c></row>
+<row><c r="A2" t="inlineStr"><is><t>George</t></is></c><c r="B2"><v>27</v></c><c r="C2" t="inlineStr"><is><t>Singer</t></is></c><c r="D2"><v>946771200</v></c></row>
+<row><c r="A3" t="inlineStr"><is><t>Ringo</t></is></c><c r="B3"><v>28</v></c><c r="C3" t="inlineStr"><is><t>Drummer</t></is></c><c r="D3"><v>946708230</v></c></row>
+<row><c r="A4" t="inlineStr"><is><t>Paul</t></is></c><c r="B4"><v>26</v></c><c r="C4" t="inlineStr"><is><t>Songwriter</t></is></c><c r="D4"><v>946706400</v></c></row>
+<row><c r="A5" t="inlineStr"><is><t>Meredith</t></is></c><c r="B5"><v>30</v></c><c r="C5" t="inlineStr"><is><t>Speaker</t></is></c><c r="D5"><v>946708210</v></c></row>
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');

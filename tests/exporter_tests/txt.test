@@ -69,8 +69,9 @@ Singer
 [Created]
 
 946684800
+----------------------------------------
 
---------------------';
+';
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expected, 'Expected result');
     $this->assertEqual($result, $expected, 'The content is as expected.');

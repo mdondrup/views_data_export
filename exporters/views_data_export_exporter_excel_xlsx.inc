@@ -95,6 +95,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
       $col++;
     }
     $output .= '</row>';
+    $output .= PHP_EOL;
     $row++;
 
     fwrite($file_handle, $output);
@@ -126,7 +127,7 @@ class ViewsDataExportExporterExcelxlsx extends ViewsDataExportExporter {
     $bof .= '<dimension ref="A1:' . $col . $row_count . '"/>';
     $bof .= '<sheetData>';
 
-    @fseek($file_handle, 0);
+    fseek($file_handle, 0);
     fwrite($file_handle, $bof);
 
     $eof = '';

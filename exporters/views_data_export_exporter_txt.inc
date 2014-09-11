@@ -39,7 +39,7 @@ class ViewsDataExportExporterTXT extends ViewsDataExportExporter {
       $row .= $value . PHP_EOL;
 
     }
-    $row .= PHP_EOL . '--------------------' . PHP_EOL;
+    $row .= '----------------------------------------' . PHP_EOL . PHP_EOL;
 
     fwrite($file_handle, $row);
   }

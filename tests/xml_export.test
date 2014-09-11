@@ -26,6 +26,14 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $display->override_option('style_plugin', 'views_data_export_xml');
     $display->override_option('path', $path);
 
+    $style_options = array(
+      'exporter_options' => array(
+        'root_node' => 'views_tests',
+        'item_node' => 'views_test',
+      ),
+    );
+    $display->override_option('style_options', $style_options);
+
     $expected = '<?xml version="1.0" encoding="UTF-8" ?>
 <views_tests>
   <views_test>
@@ -80,6 +88,13 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
       ->condition('name', 'John')
       ->execute();
 
+    $style_options = array(
+      'exporter_options' => array(
+        'root_node' => 'views_tests',
+        'item_node' => 'views_test',
+      ),
+    );
+
     $expected = '<?xml version="1.0" encoding="UTF-8" ?>
 <views_tests>
   <views_test>
@@ -109,7 +124,7 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
 
     $message = 'Hide if empty support for ' . $this->vde_export_type . ' export matched expected output.';
 
-    $this->executeAndCompareGivenView($view, $expected, $message);
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
 
   }
 
@@ -146,38 +161,45 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
       ),
     ));
 
+    $style_options = array(
+      'exporter_options' => array(
+        'root_node' => 'views_tests',
+        'item_node' => 'views_test',
+      ),
+    );
+
     $expected = '<?xml version="1.0" encoding="UTF-8" ?>
 <views_tests>
   <views_test>
     <ID>1</ID>
-    <no-name>John</no-name>
+    <Views-test:-Name>John</Views-test:-Name>
     <invalid-tag-name>25</invalid-tag-name>
   </views_test>
   <views_test>
     <ID>2</ID>
-    <no-name>George</no-name>
+    <Views-test:-Name>George</Views-test:-Name>
     <invalid-tag-name>27</invalid-tag-name>
   </views_test>
   <views_test>
     <ID>3</ID>
-    <no-name>Ringo</no-name>
+    <Views-test:-Name>Ringo</Views-test:-Name>
     <invalid-tag-name>28</invalid-tag-name>
   </views_test>
   <views_test>
     <ID>4</ID>
-    <no-name>Paul</no-name>
+    <Views-test:-Name>Paul</Views-test:-Name>
     <invalid-tag-name>26</invalid-tag-name>
   </views_test>
   <views_test>
     <ID>5</ID>
-    <no-name>Meredith</no-name>
+    <Views-test:-Name>Meredith</Views-test:-Name>
     <invalid-tag-name>30</invalid-tag-name>
   </views_test>
 </views_tests>';
 
     $message = 'Empty label test in ' . $this->vde_export_type . ' export matched expected output.';
 
-    $this->executeAndCompareGivenView($view, $expected, $message);
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
   }
 
   /**
@@ -194,8 +216,10 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $item_node = _views_data_export_xml_tag_clean($this->randomName());
 
     $style_options = array(
-      'root_node' => $root_node,
-      'item_node' => $item_node,
+      'exporter_options' => array(
+        'root_node' => $root_node,
+        'item_node' => $item_node,
+      ),
     );
 
     $expected = '<?xml version="1.0" encoding="UTF-8" ?>
@@ -241,8 +265,12 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $display = $view->display['default']->handler;
 
     $style_options = array(
-      'no_entity_encode' => array(
-        'id' => 'id',
+      'exporter_options' => array(
+        'no_entity_encode' => array(
+          'id' => 'id',
+        ),
+        'root_node' => 'views_tests',
+        'item_node' => 'views_test',
       ),
     );
 
@@ -316,9 +344,13 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $view = $this->getBasicExportView();
 
     $style_options = array(
-      'cdata_wrapper' => array(
-        'id' => 'id',
-        'name' => 'name',
+      'exporter_options' => array(
+        'cdata_wrapper' => array(
+          'id' => 'id',
+          'name' => 'name',
+        ),
+        'root_node' => 'views_tests',
+        'item_node' => 'views_test',
       ),
     );
 

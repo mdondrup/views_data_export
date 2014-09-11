@@ -97,10 +97,17 @@ class ViewsDataExportExporter implements ViewsDataExportExporterInterface {
     // Need to trim invalid characters from the start of the string:
     $tag = ltrim($tag, $invalid_start_chars);
 
+    // Need to remove always invalid characters from the tag:
+    $tag = strtr($tag, array(
+      '>' => '',
+      '<' => '',
+      '&' => '',
+    ));
+
     // As a last line of defense, if we've stripped out everything, set it to
     // something.
     if (empty($tag)) {
-      $tag = 'data';
+      $tag = 'invalid-tag-name';
     }
 
     return $tag;

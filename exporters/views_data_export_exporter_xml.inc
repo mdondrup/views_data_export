@@ -185,13 +185,13 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    */
   function add_row(&$file_handle, $data, $row_count, $field_titles) {
 
-    fwrite($file_handle, '<' . $this->options['item_node'] . '>');
-    $this->array_to_xml($data, $file_handle, null, $field_titles);
-    fwrite($file_handle, '</' . $this->options['item_node'] . '>');
+    fwrite($file_handle, '  <' . $this->options['item_node'] . '>');
+    $this->array_to_xml($data, $file_handle, null, $field_titles, 2);
+    fwrite($file_handle, PHP_EOL . '  </' . $this->options['item_node'] . '>' . PHP_EOL );
 
   }
 
-  function array_to_xml($array, &$file_handle, $open_key, $field_titles) {
+  function array_to_xml($array, &$file_handle, $open_key, $field_titles, $indent) {
     $key_open = false;
     foreach($array as $key => $value) {
 
@@ -200,15 +200,13 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
       // It's a parent node - open it and recurse to render the children.
       if (is_array($value)) {
         // Open a parent key.
-        fwrite($file_handle, '<' . $this->clean_xml_tag($field_titles[$key]) . '>');
+        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '<' . $this->clean_xml_tag($field_titles[$key]) . '>');
+        $indent++;
         $key_open = true;
         // Recursive call, to render children.
-        $this->array_to_xml($value, $file_handle, $key, $field_titles);
+        $this->array_to_xml($value, $file_handle, $key, $field_titles, $indent);
 
-      // It's a child/leaf node - render it.
       } else {
-
-
         // Don't encode <> if it contains valid XML ready for export.
         // (Or if it's about to be wrapped in CDATA tags!)
         if (in_array($key, $this->options['no_entity_encode'], TRUE) || in_array($key, $this->options['cdata_wrapper'], TRUE)) {
@@ -223,15 +221,17 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
         }
 
         // Write element to the file.
-        fwrite($file_handle, '<' . $clean_tag . '>' . $value_to_write . '</' . $clean_tag . '>');
+        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '<' . $clean_tag . '>' . $value_to_write . '</' . $clean_tag . '>');
       }
       // Close the open parent key.
       if ($key_open) {
-        fwrite($file_handle, '</' . $clean_tag . '>');
+        $indent--;
+        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '</' . $clean_tag . '>');
         $key_open = false;
       }
     }
   }
+
 
   function _clean_tag_from_key($key, $field_titles) {
 
@@ -239,6 +239,16 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
     // If we can't get one, we'll clean the one we have.
     if (isset($field_titles[$key])) {
       $key = $field_titles[$key];
+    }
+
+    // Check whether it's a numeric index *first* in case it's 0.
+    if ($key == '0') {
+      $key = 'data';
+    } else if (is_numeric($key)) {
+      $key = 'data';
+    // Check that it actually has a value.
+    } else if (!isset($key) || $key == '') {
+      $key = 'no-name';
     }
 
     // Make sure key/attribute names are valid.
@@ -291,7 +301,7 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   A PHP file handle to the export file.
    */
   function bof(&$file_handle) {
-    fwrite($file_handle, '<?xml version="1.0" encoding="UTF-8" ?>' . PHP_EOL . '<' . $this->options['root_node'] . '>');
+    fwrite($file_handle, '<?xml version="1.0" encoding="UTF-8" ?>' . PHP_EOL . '<' . $this->options['root_node'] . '>' . PHP_EOL );
   }
 
   /**

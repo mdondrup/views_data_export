@@ -224,7 +224,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       $this->extra_style = views_get_plugin('style', $style_name);
       $this->extra_style->init($this->view, $parent_display, $style_options);
 
-      // Call the second styles sort funciton and return the value.
+      // Call the second styles sort function and return the value.
       return $this->extra_style->build_sort();
     }
   }
@@ -253,22 +253,20 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       return;
     }
 
-    $output = '';
-    $rows['header'] = $this->render_header();
-    $rows['body'] = $this->render_body();
-    $rows['footer'] = $this->render_footer();
-    $title = '';
-    $output .= theme($this->theme_functions(), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
-    return $output;
-  }
-
-  function render_header() {
-
     // Open a file stream to write to.
     $file = fopen('php://memory', 'w+');
 
-    // Get the BOF.
-    $this->get_exporter()->bof($file);
+//    $output = '';
+//    $rows['header'] = $this->render_header();
+//    $rows['body'] = $this->render_body();
+//    $rows['footer'] = $this->render_footer();
+//    $title = '';
+//    $output .= theme($this->theme_functions(), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
+//    return $output;
+
+    $this->render_header($file);
+    $this->render_body($file);
+    $this->render_footer($file);
 
     // Read from file and verify contents.
     fseek($file, 0);
@@ -284,28 +282,70 @@ class views_data_export_plugin_style_export extends views_plugin_style {
 
   }
 
-  function render_footer() {
-    // Open a file stream to write to.
-    $file = fopen('php://memory', 'w+');
+  function render_header($file = null) {
+
+    // Return a value if we haven't been given a file to write to.
+    $return_a_value = is_null($file);
+    if ($return_a_value) {
+      $file = fopen('php://memory', 'w+');
+    }
+
+    // Get the field titles/labels.
+    $field_labels = $this->display->handler->get_field_labels();
 
     // Get the BOF.
+    $this->get_exporter(array('field_labels' => $field_labels,))->bof($file);
+
+    // Return a value if we haven't been given a file to write to.
+    if ($return_a_value) {
+      // Read from file and verify contents.
+      fseek($file, 0);
+      $contents = '';
+      while (!feof($file)) {
+        $contents .= fread($file, 8192);
+      }
+
+      // Close up the file stream.
+      fclose($file);
+      return $contents;
+    }
+  }
+
+  function render_footer($file = null) {
+
+    // Return a value if we haven't been given a file to write to.
+    $return_a_value = is_null($file);
+    if ($return_a_value) {
+      $file = fopen('php://memory', 'w+');
+    }
+
     // TODO Get the actual row and column counts!
-    $this->get_exporter()->eof($file, 0, 0);
+    $this->get_exporter()->eof($file, 1, 1);
 
-    // Read from file and verify contents.
-    fseek($file, 0);
-    $contents = '';
-    while (!feof($file)) {
-      $contents .= fread($file, 8192);
+    // Return a value if we haven't been given a file to write to.
+    if ($return_a_value) {
+      // Read from file and verify contents.
+      fseek($file, 0);
+      $contents = '';
+      while (!feof($file)) {
+        $contents .= fread($file, 8192);
+      }
+
+      // Close up the file stream.
+      fclose($file);
+      return $contents;
     }
-
-    // Close up the file stream.
-    fclose($file);
-
-    return $contents;
   }
 
-  function render_body() {
+  function render_body($file = null) {
+
+    // Return a value if we haven't been given a file to write to.
+    $return_a_value = is_null($file);
+    if ($return_a_value) {
+      // Write to our own memory stream.
+      $file = fopen('php://memory', 'w+');
+    }
+
     if ($this->uses_row_plugin() && empty($this->row_plugin)) {
       vpr('views_plugin_style_default: Missing row plugin');
       return;
@@ -314,12 +354,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $view     = $this->view;
     $fields   = &$view->field;
 
-    $field_titles = array();
-    foreach ($fields as $key => $field) {
-      if (empty($field->options['exclude'])) {
-        $field_titles = check_plain($field->label());
-      }
-    }
+    $field_labels = $this->display->handler->get_field_labels();
 
     // Group the rows according to the grouping field, if specified.
     $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
@@ -327,7 +362,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     // Render each group separately and concatenate.  Plugins may override this
     // method if they wish some other way of handling grouping.
     $output = '';
-    $file = fopen('php://memory', 'w+');
+//    $file = fopen('php://memory', 'w+');
     $exporter = $this->get_exporter();
     $row_count = 0;
 
@@ -342,7 +377,6 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       else {
         $rows = $records;
       }
-
 
       $hide_empty_support = $exporter->supports_hide_if_empty();
 
@@ -366,24 +400,27 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         }
       }
 
-
       foreach ($themed_rows as $row) {
-        $exporter->add_row($file, $row, $row_count, $field_titles);
+        $exporter->add_row($file, $row, $row_count, $field_labels);
         $row_count++;
       };
     }
 
-    // Read from file and verify contents.
-    fseek($file, 0);
-    while (!feof($file)) {
-      $output .= fread($file, 8192);
-    }
-
-    // Close up the file stream.
-    fclose($file);
-
     unset($this->view->row_index);
-    return $output;
+
+    // Return a value if we haven't been given a file to write to.
+    if ($return_a_value) {
+      // Read from file and verify contents.
+      fseek($file, 0);
+      $contents = '';
+      while (!feof($file)) {
+        $contents .= fread($file, 8192);
+      }
+      // Close up the file stream.
+      fclose($file);
+      // Return the contents.
+      return $contents;
+    }
   }
 
   /**
@@ -491,12 +528,18 @@ class views_data_export_plugin_style_export extends views_plugin_style {
    * Get our exporter initialised and ready for use.
    */
   function get_exporter($options = NULL) {
+
     if (is_null($options)) {
       $options = $this->options['exporter_options'];
     }
-    if (is_null($this->exporter)){
-      $this->exporter = new $this->definition['exporter']($options);
+    else  if ($options == $this->options['exporter_options']) {
+      return $this->exporter;
     }
+    else {
+      $options = array_merge($options, $this->options['exporter_options']);
+    }
+
+    $this->exporter = new $this->definition['exporter']($options);
     return $this->exporter;
   }
 
