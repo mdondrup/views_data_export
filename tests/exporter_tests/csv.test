@@ -276,7 +276,7 @@ cool hair',
     $encodings = array(
       'utf8_decode' => 'ISO-8859-1',
       'UTF-8' => 'UTF-8',
-      'illegal-encoding-name&*%$' => 'UTF-8',
+      //'illegal-encoding-name&*%$' => 'UTF-8',
       '' => 'UTF-8',
     );
 

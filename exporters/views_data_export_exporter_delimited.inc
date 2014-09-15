@@ -169,13 +169,8 @@ class ViewsDataExportExporterDelimited extends ViewsDataExportExporter implement
         $row = utf8_decode($row);
       }
       // Other values are passed to iconv.
-      else if (iconv_get_encoding($encoding)){
-        $row = utf8_encode($row);
+      else {
         $row = iconv('UTF-8', $encoding, $row);
-      // If even iconv doesn't support the encoding,
-      // (it may be illegal/misspelled), then stick with UTF-8.
-      } else {
-        $row = utf8_encode($row);
       }
     } else {
       // If no encoding is set, stick to UTF-8.
