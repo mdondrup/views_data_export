@@ -235,7 +235,7 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
     $expected = '  <item>
     <name><strong>John</strong></name>
     <age>25</age>
-    <job>&lt;em&gt;Singer&lt;/em&gt;</job>
+    <job>&amp;lt;em&amp;gt;Singer&amp;lt;/em&amp;gt;</job>
   </item>
 ';
 
@@ -296,7 +296,7 @@ class XMLExportViewsDataExportExporterTests extends ViewsDataExportExporterBaseT
       )
     );
     $result = $this->executeEOF($exporter);
-    $expect = '</test_root_node>';
+    $expect = '</test_root_node>' . PHP_EOL;
     $this->logVerboseResult($result, 'Actual result');
     $this->logVerboseResult($expect, 'Expected to contain');
     $this->assertEqual($result, $expect, 'The EOF is as expected.');

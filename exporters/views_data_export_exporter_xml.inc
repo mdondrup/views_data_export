@@ -185,48 +185,88 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    */
   function add_row(&$file_handle, $data, $row_count, $field_titles) {
 
-    fwrite($file_handle, '  <' . $this->options['item_node'] . '>');
-    $this->array_to_xml($data, $file_handle, null, $field_titles, 2);
-    fwrite($file_handle, PHP_EOL . '  </' . $this->options['item_node'] . '>' . PHP_EOL );
+    // Set up an XMLWriter object.
+    $writer = new XMLWriter();
+    $writer->openMemory();
+    $writer->setIndent(TRUE);
+    $writer->setIndentString("  ");
 
+    // Get bof() to write the bof to our writer.
+    $null_file = NULL;
+    $this->bof($null_file, $writer);
+    $writer->writeElement('bluff', 'content');
+    // Clear out its contents, to leave it blank but at the right indentation.
+    $writer->flush();
+
+    // Open the item tag.
+    $writer->startElement($this->options['item_node']);
+    // Get the row contents as XML.
+    $this->array_to_xml($writer, $data, $file_handle, $field_titles);
+    // Close the item tag.
+    $writer->endElement();
+
+    // Write the XMLWriter contents to the provided file.
+    $output = $writer->outputMemory(TRUE);
+
+    // Remove the extra indentation-correcting tag from the start.
+    //$output = preg_replace('/<' . $this->options['root_node'] . ">\n/", '', $output, 1);
+    fwrite($file_handle, $output);
   }
 
-  function array_to_xml($array, &$file_handle, $open_key, $field_titles, $indent) {
+  function array_to_xml(&$writer, $array, &$file_handle, $field_titles) {
     $key_open = false;
     foreach($array as $key => $value) {
 
+      // Ensure we are writing a valid XML tag name.
       $clean_tag = $this->_clean_tag_from_key($key, $field_titles);
 
       // It's a parent node - open it and recurse to render the children.
       if (is_array($value)) {
         // Open a parent key.
-        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '<' . $this->clean_xml_tag($field_titles[$key]) . '>');
-        $indent++;
+        $writer->startElement($clean_tag);
         $key_open = true;
         // Recursive call, to render children.
-        $this->array_to_xml($value, $file_handle, $key, $field_titles, $indent);
-
-      } else {
-        // Don't encode <> if it contains valid XML ready for export.
-        // (Or if it's about to be wrapped in CDATA tags!)
-        if (in_array($key, $this->options['no_entity_encode'], TRUE) || in_array($key, $this->options['cdata_wrapper'], TRUE)) {
-          $value_to_write = $value;
-        } else {
-          $value_to_write = htmlspecialchars($value);
-        }
-
-        // Wrap target elements in CDATA tags.
-        if (in_array($key, $this->options['cdata_wrapper'], TRUE)) {
-          $value_to_write = '<![CDATA[' . $value_to_write . ']]>';
-        }
-
-        // Write element to the file.
-        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '<' . $clean_tag . '>' . $value_to_write . '</' . $clean_tag . '>');
+        $this->array_to_xml($writer, $value, $file_handle, $field_titles);
       }
+
+      // It's a leaf node - just write it out.
+      else {
+        // If it contains valid XML ready for export, don't encode it.
+        if (in_array($key, $this->options['no_entity_encode'], TRUE)) {
+          // We want to write the raw value.
+          $value_to_write = $value;
+          // Open the tag.
+          $writer->startElement($clean_tag);
+          // Write the data raw, as is.
+          $writer->writeRaw($value_to_write);
+          // Close the tag.
+          $writer->endElement();
+        }
+
+        // Write CDATA element.
+        else if (in_array($key, $this->options['cdata_wrapper'], TRUE)) {
+          // We want to write the raw value.
+          $value_to_write = $value;
+          // Open the tag.
+          $writer->startElement($clean_tag);
+          // Write the data within CDATA tags.
+          $writer->writeCData($value_to_write);
+          // Close the tag.
+          $writer->endElement();
+        }
+
+        // Write a normal element.
+        else {
+          // Write normal element to the file, encoding special characters.
+          $value_to_write = htmlspecialchars($value);
+          // Write the tag & contents.
+          $writer->writeElement($clean_tag, $value_to_write);
+        }
+      }
+
       // Close the open parent key.
       if ($key_open) {
-        $indent--;
-        fwrite($file_handle, PHP_EOL . str_repeat("  ", $indent) . '</' . $clean_tag . '>');
+        $writer->endElement();
         $key_open = false;
       }
     }
@@ -244,10 +284,12 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
     // Check whether it's a numeric index *first* in case it's 0.
     if ($key == '0') {
       $key = 'data';
-    } else if (is_numeric($key)) {
+    }
+    else if (is_numeric($key)) {
       $key = 'data';
     // Check that it actually has a value.
-    } else if (!isset($key) || $key == '') {
+    }
+    else if (!isset($key) || $key == '') {
       $key = 'no-name';
     }
 
@@ -300,8 +342,23 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    * @param $file_handle
    *   A PHP file handle to the export file.
    */
-  function bof(&$file_handle) {
-    fwrite($file_handle, '<?xml version="1.0" encoding="UTF-8" ?>' . PHP_EOL . '<' . $this->options['root_node'] . '>' . PHP_EOL );
+  function bof(&$file_handle = null, &$writer = null) {
+    // Use an XMLWriter to form our XML
+    if (is_null($writer)) {
+      $writer = new XMLWriter();
+      $writer->openMemory();
+      $writer->setIndent(TRUE);
+      $writer->setIndentString("  ");
+    }
+
+    $writer->startDocument("1.0", "UTF-8");
+    $writer->startElement($this->options['root_node']);
+    $writer->text('');
+
+    // If we have a file to write to, write to it.
+    if (!is_null($file_handle)) {
+      fwrite($file_handle, $writer->outputMemory(TRUE) . PHP_EOL);
+    }
   }
 
   /**
@@ -311,7 +368,21 @@ class ViewsDataExportExporterXML extends ViewsDataExportExporter implements View
    *   A PHP file handle to the export file.
    */
   function eof(&$file_handle, $row_count, $col_count) {
-    fwrite($file_handle, '</' . $this->options['root_node'] . '>' );
+    // Use an XMLWriter to form our XML
+    $writer = new XMLWriter();
+    $writer->openMemory();
+    $writer->setIndent(TRUE);
+    $writer->setIndentString("  ");
+
+    $writer->startDocument("1.0", "UTF-8");
+    $writer->startElement($this->options['root_node']);
+    $writer->writeElement('bluff', 'empty');
+    $writer->flush();
+
+    $writer->endElement();
+
+    // Write the output to our file.
+    fwrite($file_handle, $writer->outputMemory(TRUE));
   }
 
   /**
