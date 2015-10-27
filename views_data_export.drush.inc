@@ -17,12 +17,12 @@ function views_data_export_drush_command() {
       'output_file' => 'The file to write the results to - will be overwritten if it already exists',
     ),
     'options' => array (
-      '--arguments' => 'Comma separated list of arguments to be passed to the view.',
-      '--format' => 'csv,doc,txt,xls or xml. These options are ignored if the display_id passed is a "views_data_export" display.',
-      '--separator' => 'csv only: What character separates the fields (default:,)',
-      '--trim-whitespace' => 'csv only: Trim whitespace from either side of fields (default:1)',
-      '--header-row' => 'csv only: Make the first row a row of headers (default:1)',
-      '--quote-values' => 'csv only: Surround each field in quotes (default:1)',
+      'arguments' => 'Comma separated list of arguments to be passed to the view.',
+      'format' => 'csv,doc,txt,xls or xml. These options are ignored if the display_id passed is a "views_data_export" display.',
+      'separator' => 'csv only: What character separates the fields (default:,)',
+      'trim-whitespace' => 'csv only: Trim whitespace from either side of fields (default:1)',
+      'header-row' => 'csv only: Make the first row a row of headers (default:1)',
+      'quote-values' => 'csv only: Surround each field in quotes (default:1)',
     ),
     'examples' => array (
       'drush views-data-export myviewname views_data_export_1 output.csv' => 'Export myviewname:views_data_export_1 and write the output to output.csv in the current directory',
