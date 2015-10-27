@@ -168,19 +168,19 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
     $options['output_file'] = realpath(drush_get_context('DRUSH_OLDCWD', getcwd())) . '/' . $output_file;
   }
 
+  $arguments = drush_get_option('arguments', '');
+  $arguments = explode(',', $arguments);
 
   if ($view->display_handler->is_batched()) {
     // This is a batched export, and needs to be handled as such.
     _drush_views_data_export_override_batch($view_name, $display_id, $options);
 
-    $arguments = drush_get_option('arguments', '');
-    $arguments = explode(',', $arguments);
     $view->execute_display($display_id, $arguments);
   }
   else {
     // This export isn't batched.
     ob_start();
-    $view->execute_display($display_id);
+    $view->execute_display($display_id, $arguments);
     // Get the results, and clean the output buffer.
     $result = ob_get_contents();
     // Clean the buffer.
