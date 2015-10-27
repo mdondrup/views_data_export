@@ -297,8 +297,11 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $this->initialize_index();
     //$this->batched_execution_state->fid = $this->outputfile_create();
 
-    // Initialize the progress counter
-    $this->batched_execution_state->sandbox['max'] = db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}')->fetchField();
+    // Initialize the progress counter.
+    if (db_table_exists($this->index_tablename())) {
+      $this->batched_execution_state->sandbox['max'] = db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}')->fetchField();
+    }
+
     // Record the time we started.
     list($usec, $sec) = explode(' ', microtime());
     $this->batched_execution_state->sandbox['started'] = (float) $usec + (float) $sec;
