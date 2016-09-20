@@ -15,6 +15,7 @@ files[] = plugins/views_data_export_plugin_style_export_xml.inc
 ; Tests
 files[] = "tests/base.test"
 files[] = "tests/access.test"
+files[] = "tests/garbagecollection.test"
 files[] = "tests/csv_export.test"
 files[] = "tests/doc_export.test"
 files[] = "tests/txt_export.test"
