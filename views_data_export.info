@@ -47,4 +47,7 @@ files[] = "tests/exporter_tests/xlsx.test"
 files[] = "tests/exporter_tests/txt.test"
 files[] = "tests/exporter_tests/doc.test"
 files[] = "tests/exporter_tests/xml.test"
+<<<<<<< HEAD
+>>>>>>> 2eeb383... added fasta friendly exporter
+=======
 >>>>>>> 2eeb383... added fasta friendly exporter
