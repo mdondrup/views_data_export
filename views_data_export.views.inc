@@ -132,7 +132,7 @@ function views_data_export_views_plugins() {
         'export feed type' => 'xls',
         'export feed text' => 'XLS',
         'export feed file' => '%view.xls',
-        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/xls.png',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/excel.png',
         'additional themes' => array(
           'views_data_export_xls_header' => 'style',
           'views_data_export_xls_body' => 'style',
