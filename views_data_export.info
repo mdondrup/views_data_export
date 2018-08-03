@@ -13,6 +13,7 @@ files[] = plugins/views_data_export_plugin_style_export.inc
 ; Exporters
 files[] = exporters/views_data_export_exporter.inc
 files[] = exporters/views_data_export_exporter_delimited.inc
+files[] = exporters/views_data_export_exporter_fasta.inc
 files[] = exporters/views_data_export_exporter_doc.inc
 files[] = exporters/views_data_export_exporter_excel_xlsx.inc
 files[] = exporters/views_data_export_exporter_txt.inc
