@@ -259,6 +259,14 @@ function template_preprocess_views_data_export_txt_body(&$vars) {
   _views_data_export_body_shared_preprocess($vars);
 }
 
+function template_preprocess_views_data_export_fasta_body(&$vars) {
+  _views_data_export_header_shared_preprocess($vars);
+  // We support not outputting fields when they are empty, so indicate so.
+  $vars['hide_empty_support'] = FALSE;
+  _views_data_export_body_shared_preprocess($vars);
+}
+
+
 /**
  * Implements hook_preprocess_views_data_export_doc_body().
  */

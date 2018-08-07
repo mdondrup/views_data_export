@@ -9,24 +9,9 @@ dependencies[] = views
 ; Plugins
 files[] = plugins/views_data_export_plugin_display_export.inc
 files[] = plugins/views_data_export_plugin_style_export.inc
-<<<<<<< HEAD
 files[] = plugins/views_data_export_plugin_style_export_csv.inc
 files[] = plugins/views_data_export_plugin_style_export_xml.inc
-=======
-
-; Exporters
-files[] = exporters/views_data_export_exporter.inc
-files[] = exporters/views_data_export_exporter_delimited.inc
-files[] = exporters/views_data_export_exporter_fasta.inc
-files[] = exporters/views_data_export_exporter_doc.inc
-files[] = exporters/views_data_export_exporter_excel_xlsx.inc
-files[] = exporters/views_data_export_exporter_txt.inc
-files[] = exporters/views_data_export_exporter_xml.inc
-
-; Interfaces
-files[] = exporters/ViewsDataExportExporterInterface.inc
-files[] = exporters/ViewsDataExportExporterUserConfigurationInterface.inc
->>>>>>> 2eeb383... added fasta friendly exporter
+files[] = plugins/views_data_export_plugin_style_export_fasta.inc
 
 ; Tests
 files[] = "tests/base.test"
@@ -36,18 +21,3 @@ files[] = "tests/csv_export.test"
 files[] = "tests/doc_export.test"
 files[] = "tests/txt_export.test"
 files[] = "tests/xls_export.test"
-files[] = "tests/xml_export.test"
-<<<<<<< HEAD
-=======
-
-; Exporter Tests
-files[] = "tests/exporter_tests/base.test"
-files[] = "tests/exporter_tests/csv.test"
-files[] = "tests/exporter_tests/xlsx.test"
-files[] = "tests/exporter_tests/txt.test"
-files[] = "tests/exporter_tests/doc.test"
-files[] = "tests/exporter_tests/xml.test"
-<<<<<<< HEAD
->>>>>>> 2eeb383... added fasta friendly exporter
-=======
->>>>>>> 2eeb383... added fasta friendly exporter

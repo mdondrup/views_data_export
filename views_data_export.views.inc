@@ -53,8 +53,8 @@ function views_data_export_views_plugins() {
       'views_data_export_fasta' => array(
         'title' => t('FASTA file'),
         'help' => t('Display the view as a FASTA file.'),
-        'handler' => 'views_data_export_plugin_style_export',
-        'exporter' => 'ViewsDataExportExporterFasta',
+        'handler' => 'views_data_export_plugin_style_export_fasta',
+        // 'exporter' => 'ViewsDataExportExporterFasta',
         // Views Data Export element that will be used to set additional headers when serving the feed.
         'export headers' => array('Content-type' => 'text/csv; charset=utf-8'),
         // Views Data Export element mostly used for creating some additional classes and template names.
@@ -63,9 +63,9 @@ function views_data_export_views_plugins() {
         'export feed file' => '%view.fasta',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/fasta.png',
         'additional themes' => array(
-          'views_data_export_csv_header' => 'style',
-          'views_data_export_csv_body' => 'style',
-          'views_data_export_csv_footer' => 'style',
+          'views_data_export_fasta_header' => 'style',
+          'views_data_export_fasta_body' => 'style',
+          'views_data_export_fasta_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_fasta',
       ) + $style_defaults,
