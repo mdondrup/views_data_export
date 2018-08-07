@@ -8,7 +8,10 @@ This module is designed to provide a way to export large amounts of data from
 views. It provides a display plugin that can rendered progressively in a batch.
 Style plugins are include that support exporting in the following types:
 
+* FASTA "friendly" (means: one field per line, no noise, FASTA button)
+
 * CSV
+
 * Microsoft XLS
 * Microsoft Doc
 * Basic txt
@@ -37,6 +40,7 @@ drush views-data-export [view-name] [display-id] [output-file]
 
 History
 -------
+- Modified by Michael Dondrup and adapted to support "FASTA export in Views" in LiceBase (https://licebase.org)
 
 This module has its roots in the export module that was part of the views bonus
 pack (http://drupal.org/project/views_bonus). However, massive changes were
